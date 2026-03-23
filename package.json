@@ -1,7 +1,7 @@
 {
   "name": "pocket-money",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -9,8 +9,16 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo-google-fonts/nunito": "^0.4.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~55.0.8",
+    "expo-dev-client": "~55.0.18",
+    "expo-font": "^55.0.4",
+    "expo-haptics": "~55.0.9",
+    "expo-notifications": "~55.0.13",
+    "expo-router": "~55.0.7",
     "expo-status-bar": "~55.0.4",
+    "lottie-react-native": "~7.3.4",
     "react": "19.2.0",
     "react-native": "0.83.2"
   },

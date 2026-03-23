@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "pocket-money",
+    "name": "Pocket Money",
     "slug": "pocket-money",
+    "scheme": "pocketmoney",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,7 +10,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#f0f8e8"
     },
     "ios": {
       "supportsTablet": true
@@ -21,10 +22,20 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.ohdjadja.pocketmoney"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4da79abe-9855-4b10-aecd-1ae3ae4eb698"
+      }
     }
   }
 }
