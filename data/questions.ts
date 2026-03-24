@@ -1,10 +1,51 @@
+/**
+ * data/questions.ts — All categories and their questions
+ *
+ * This file is the single source of truth for everything the questionnaire
+ * screen displays. Questions must never be hardcoded in screen components —
+ * always import from here.
+ *
+ * Structure:
+ *   - Category interface     — shape of each category object
+ *   - universalQuestions     — questions added to every category regardless
+ *   - categories array       — one entry per purchase category, each with
+ *                              a key (used as an ID), label, emoji, and
+ *                              category-specific questions
+ *   - getQuestionsForCategory — the main helper used by the questionnaire
+ *                               screen; merges universal + category questions
+ *                               and substitutes the wage-derived threshold
+ *
+ * The [threshold] placeholder in universalQuestions is replaced at runtime
+ * with the number of hours derived from the user's hourly wage. The formula
+ * is: threshold = round(50 / hourlyWage). This represents roughly how long
+ * a person would need to work to afford a £50 item — scaled to the item's
+ * actual price elsewhere. Defaults to 3 hours if no wage is set.
+ *
+ * Scoring logic (not in this file — see utils/scoring.ts when built):
+ *   A "negative" answer is a "No". The verdict is based on the ratio of
+ *   negative answers to total questions:
+ *     ≤ 1/2 negative  → 🟢 Conscious buy
+ *     1/2–5/6         → 🟡 Sleep on it
+ *     ≥ 5/6           → 🔴 Probably not for today
+ */
+
+/** Shape of a single purchase category. */
 export interface Category {
+  /** Unique string ID used as a route param and for AsyncStorage keys. */
   key: string;
+  /** Human-readable display name, e.g. "Clothing & Accessories". */
   label: string;
+  /** Emoji shown next to the category name throughout the UI. */
   emoji: string;
+  /** Category-specific yes/no questions (appended after universalQuestions). */
   questions: string[];
 }
 
+/**
+ * Questions shown for every category.
+ * The string '[threshold]' is a placeholder replaced by getQuestionsForCategory
+ * with the user's personalised hours-of-work figure.
+ */
 export const universalQuestions: string[] = [
   'Have I thought about this for at least one week?',
   'Is buying this worth giving up progress towards my goal?',
@@ -15,6 +56,7 @@ export const universalQuestions: string[] = [
   'Does it solve a problem I have genuinely noticed?',
 ];
 
+/** All supported purchase categories with their specific questions. */
 export const categories: Category[] = [
   {
     key: 'clothing',
@@ -120,17 +162,40 @@ export const categories: Category[] = [
   },
 ];
 
+/**
+ * Returns the full list of yes/no questions for a given category.
+ *
+ * Combines universalQuestions (with the [threshold] placeholder resolved)
+ * and the category-specific questions. This is what the questionnaire screen
+ * should render.
+ *
+ * @param categoryKey - The `key` field of the chosen category (e.g. 'electronics').
+ * @param hourlyWage  - The user's hourly wage from settings. Used to calculate
+ *                     how many hours of work the threshold question references.
+ *                     If omitted, the threshold defaults to 3 hours.
+ * @returns           Ordered array of question strings ready to display.
+ */
 export function getQuestionsForCategory(
   categoryKey: string,
   hourlyWage?: number
 ): string[] {
   const category = categories.find((c) => c.key === categoryKey);
+
+  // If the key doesn't match any known category, return just the universal
+  // questions as a safe fallback rather than an empty array.
   if (!category) return universalQuestions;
 
+  // Derive the hours threshold: how long would the user need to work to afford
+  // a "typical" discretionary item (~£50)? round(50 / wage).
+  // e.g. wage=25 → threshold=2h, wage=10 → threshold=5h.
+  // Default of 3 is used when the user hasn't set their wage.
   const threshold = hourlyWage ? Math.round(50 / hourlyWage) : 3;
+
+  // Replace the [threshold] placeholder in the universal questions array.
   const processed = universalQuestions.map((q) =>
     q.replace('[threshold]', String(threshold))
   );
 
+  // Universal questions first, then category-specific questions.
   return [...processed, ...category.questions];
 }
